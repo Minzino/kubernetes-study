@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "monitoring-stack.fullname" . }}-kube-state-metrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "monitoring-stack.fullname" . }}-kube-state-metrics
+  template:
+    metadata:
+      labels:
+        app: {{ include "monitoring-stack.fullname" . }}-kube-state-metrics
+    spec:
+      containers:
+        - name: kube-state-metrics
+          image: "{{ .Values.kube_state_metrics.image.repository }}:{{ .Values.kube_state_metrics.image.tag }}"
+          ports:
+            - containerPort: 8080

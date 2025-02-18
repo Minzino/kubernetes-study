@@ -1,36 +1,38 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: prometheus
+  name: {{ include "monitoring-stack.fullname" . }}-prometheus
 spec:
   selector:
-    app: prometheus
+    app: {{ include "monitoring-stack.fullname" . }}-prometheus
   ports:
     - protocol: TCP
       port: 9090
       targetPort: 9090
+      nodePort: 32001
   type: NodePort
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: grafana
+  name: {{ include "monitoring-stack.fullname" . }}-grafana
 spec:
   selector:
-    app: grafana
+    app: {{ include "monitoring-stack.fullname" . }}-grafana
   ports:
     - protocol: TCP
       port: 3000
       targetPort: 3000
+      nodePort: 32000
   type: NodePort
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: node-exporter
+  name: {{ include "monitoring-stack.fullname" . }}-node-exporter
 spec:
   selector:
-    app: node-exporter
+    app: {{ include "monitoring-stack.fullname" . }}-node-exporter
   ports:
     - protocol: TCP
       port: 9100

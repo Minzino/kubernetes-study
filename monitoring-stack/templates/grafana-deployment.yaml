@@ -1,19 +1,40 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: grafana
+  name: {{ include "monitoring-stack.fullname" . }}-grafana
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: grafana
+      app: {{ include "monitoring-stack.fullname" . }}-grafana
   template:
     metadata:
       labels:
-        app: grafana
+        app: {{ include "monitoring-stack.fullname" . }}-grafana
     spec:
       containers:
         - name: grafana
           image: "{{ .Values.grafana.image.repository }}:{{ .Values.grafana.image.tag }}"
           ports:
             - containerPort: 3000
+          volumeMounts:
+            - name: dashboards-provisioning
+              mountPath: /etc/grafana/provisioning/dashboards
+            - name: datasources-provisioning
+              mountPath: /etc/grafana/provisioning/datasources
+        - name: grafana-dashboards-sidecar
+          image: "{{ .Values.grafana.sidecar.image.repository }}:{{ .Values.grafana.sidecar.image.tag }}"
+          env:
+            - name: LABEL
+              value: "grafana_dashboard=1"
+            - name: FOLDER
+              value: "/etc/grafana/provisioning/dashboards"
+          volumeMounts:
+            - name: dashboards-provisioning
+              mountPath: /etc/grafana/provisioning/dashboards
+      volumes:
+        - name: dashboards-provisioning
+          emptyDir: {}
+        - name: datasources-provisioning
+          configMap:
+            name: {{ include "monitoring-stack.fullname" . }}-grafana-datasource

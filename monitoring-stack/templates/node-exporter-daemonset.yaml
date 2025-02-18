@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: node-exporter
+  name: {{ include "monitoring-stack.fullname" . }}-node-exporter
 spec:
   selector:
     matchLabels:
-      app: node-exporter
+      app: {{ include "monitoring-stack.fullname" . }}-node-exporter
   template:
     metadata:
       labels:
-        app: node-exporter
+        app: {{ include "monitoring-stack.fullname" . }}-node-exporter
     spec:
       containers:
         - name: node-exporter

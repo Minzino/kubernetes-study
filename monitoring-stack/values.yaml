@@ -20,20 +20,30 @@ prometheus:
   storageSpec:
     volumeClaimTemplate:
       spec:
-        accessModes: [ "ReadWriteOnce" ]
+        accessModes: ["ReadWriteOnce"]
         resources:
           requests:
             storage: 10Gi
+  additionalScrapeConfigs: |
+    - job_name: 'kube-controller'
+      static_configs:
+        - targets: ['kube-apiserver.monitoring-cluster:6443', 'kube-controller-manager.monitoring-cluster:10257', 'kube-scheduler.monitoring-cluster:10259']
+    - job_name: 'etcd'
+      static_configs:
+        - targets: ['etcd.monitoring-cluster:2379']
+    - job_name: 'kubelet'
+      static_configs:
+        - targets: ['worker1.monitoring-cluster:10250', 'worker2.monitoring-cluster:10250']
+    - job_name: 'cilium'
+      static_configs:
+        - targets: ['cilium.monitoring-cluster:9090']
+
 
 grafana:
   image:
     repository: docker.io/grafana/grafana
     tag: 11.3.1
   sidecar:
-    datasources:
-      enabled: true
-      label: grafana_datasource
-      searchNamespace: ALL
     image:
       repository: quay.io/kiwigrid/k8s-sidecar
       tag: 1.28.0
@@ -54,3 +64,34 @@ prometheus_node_exporter:
     limits:
       cpu: 100m
       memory: 100Mi
+
+loki:
+  image:
+    repository: docker.io/grafana/loki
+    tag: 3.3.0
+  service:
+    type: ClusterIP
+  persistence:
+    enabled: true
+    size: 10Gi
+
+promtail:
+  image:
+    repository: grafana/promtail
+    tag: 3.0.0
+  config: {}
+  service:
+    type: ClusterIP
+
+
+kube_state_metrics:
+  image:
+    repository: registry.k8s.io/kube-state-metrics/kube-state-metrics
+    tag: v2.14.0
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
