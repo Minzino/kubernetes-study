@@ -1,0 +1,56 @@
+prometheus:
+  image:
+    repository: quay.io/prometheus/prometheus
+    tag: v2.55.1
+  prometheusOperator:
+    image:
+      repository: quay.io/prometheus-operator/prometheus-operator
+      tag: v0.78.2
+  prometheusConfigReloader:
+    image:
+      repository: quay.io/prometheus-operator/prometheus-config-reloader
+      tag: v0.78.2
+  resources:
+    requests:
+      cpu: 200m
+      memory: 1Gi
+    limits:
+      cpu: 500m
+      memory: 2Gi
+  storageSpec:
+    volumeClaimTemplate:
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 10Gi
+
+grafana:
+  image:
+    repository: docker.io/grafana/grafana
+    tag: 11.3.1
+  sidecar:
+    datasources:
+      enabled: true
+      label: grafana_datasource
+      searchNamespace: ALL
+    image:
+      repository: quay.io/kiwigrid/k8s-sidecar
+      tag: 1.28.0
+  adminUser: admin
+  adminPassword: admin
+  service:
+    type: NodePort
+    nodePort: 30300
+
+prometheus_node_exporter:
+  image:
+    repository: quay.io/prometheus/node-exporter
+    tag: v1.8.2
+  resources:
+    requests:
+      cpu: 50m
+      memory: 50Mi
+    limits:
+      cpu: 100m
+      memory: 100Mi
