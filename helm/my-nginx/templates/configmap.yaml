@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-nginx-config
+data:
+  nginx.conf: |
+    events { }
+    http {
+      server {
+        listen {{ .Values.env.NGINX_PORT }};
+        location / {
+          root /usr/share/nginx/html;
+          index index.html;
+        }
+      }
+    }

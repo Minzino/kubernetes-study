@@ -1,0 +1,18 @@
+# kind-config.yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: monitoring-cluster
+nodes:
+  - role: control-plane
+    image: kindest/node:v1.29.7
+    extraPortMappings:
+      - containerPort: 30300   # Grafana NodePort
+        hostPort: 30300
+        protocol: TCP
+      - containerPort: 30090   # Prometheus NodePort
+        hostPort: 30090
+        protocol: TCP
+  - role: worker
+    image: kindest/node:v1.29.7
+  - role: worker
+    image: kindest/node:v1.29.7
