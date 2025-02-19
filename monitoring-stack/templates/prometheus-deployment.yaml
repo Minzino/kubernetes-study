@@ -13,6 +13,7 @@ spec:
       labels:
         app: {{ include "monitoring-stack.fullname" . }}-prometheus
     spec:
+      serviceAccountName: {{ include "monitoring-stack.fullname" . }}-prometheus
       containers:
         - name: prometheus
           image: "{{ .Values.prometheus.image.repository }}:{{ .Values.prometheus.image.tag }}"
@@ -21,10 +22,9 @@ spec:
           ports:
             - containerPort: 9090
           volumeMounts:
-            - name: prometheus-config
-              mountPath: /etc/prometheus/prometheus.yml
-              subPath: prometheus.yml
+            - name: config
+              mountPath: /etc/prometheus
       volumes:
-        - name: prometheus-config
+        - name: config
           configMap:
             name: {{ include "monitoring-stack.fullname" . }}-prometheus-config

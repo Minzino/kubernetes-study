@@ -6,23 +6,75 @@ data:
   prometheus.yml: |-
     global:
       scrape_interval: 15s
+      evaluation_interval: 15s
+
     scrape_configs:
-      - job_name: 'prometheus'
-        static_configs:
-          - targets: ['localhost:9090']
-{{- if .Values.prometheus.additionalScrapeConfigs }}
-{{ .Values.prometheus.additionalScrapeConfigs | indent 6 }}
-{{- else }}
-      - job_name: 'kube-controller'
-        static_configs:
-          - targets: ['<kube-apiserver-host>:6443', '<kube-controller-manager-host>:10257', '<kube-scheduler-host>:10259']
-      - job_name: 'etcd'
-        static_configs:
-          - targets: ['<etcd-host>:2379']
+      # API 서버 메트릭
+      - job_name: 'kubernetes-apiservers'
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names: [ kube-system ]
+        scheme: https
+        tls_config:
+          insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+          - source_labels: [ __meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name ]
+            action: keep
+            regex: kube-system;kubernetes;https
+
+      # Kubelet 메트릭 (Kind 환경에서는 기본적으로 비활성화되어 있을 수 있음)
       - job_name: 'kubelet'
-        static_configs:
-          - targets: ['<node-ip>:10250']
+        kubernetes_sd_configs:
+          - role: node
+        scheme: https
+        tls_config:
+          insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+          - source_labels: [ __address__ ]
+            target_label: __address__
+            regex: (.*):.*
+            replacement: ${1}:10250
+
+      # Kube-scheduler 메트릭 (Kind 환경에 따라 제공되지 않을 수 있음)
+      - job_name: 'kube-scheduler'
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: [ kube-system ]
+        relabel_configs:
+          - source_labels: [ __meta_kubernetes_pod_label_component ]
+            action: keep
+            regex: kube-scheduler
+
+      # etcd 메트릭 (Kind 환경에 따라 제공되지 않을 수 있음)
+      - job_name: 'etcd'
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: [ kube-system ]
+        relabel_configs:
+          - source_labels: [ __meta_kubernetes_pod_label_component ]
+            action: keep
+            regex: etcd
+
+      # Cilium 메트릭 (Pod 애노테이션 기반)
       - job_name: 'cilium'
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: [ kube-system ]
+        relabel_configs:
+          - source_labels: [ __meta_kubernetes_pod_annotation_prometheus_io_scrape ]
+            action: keep
+            regex: "true"
+          - source_labels: [ __meta_kubernetes_pod_ip ]
+            target_label: __address__
+            replacement: ${1}:9090
+
+      # Node Exporter 메트릭 (내부 DNS FQDN 사용)
+      - job_name: 'node-exporter'
         static_configs:
-          - targets: ['<cilium-agent-ip>:9090']
-{{- end }}
+          - targets: [ "monitoring-stack-node-exporter.default.svc.cluster.local:9100" ]

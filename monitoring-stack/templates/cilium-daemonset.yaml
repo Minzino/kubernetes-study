@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "monitoring-stack.fullname" . }}-cilium
+  namespace: kube-system
+  labels:
+    app: cilium
+spec:
+  selector:
+    matchLabels:
+      app: cilium
+  template:
+    metadata:
+      labels:
+        app: cilium
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+    spec:
+      hostNetwork: true
+      containers:
+        - name: cilium
+          image: "{{ .Values.cilium.image.repository }}:{{ .Values.cilium.image.tag }}"
+          command: [ "/usr/bin/cilium-agent",
+                     "--config-dir=/etc/cilium",
+                     "--enable-ipv6=false",
+                     "--kube-proxy-replacement=disabled" ]
+          env:
+            - name: K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          ports:
+            - containerPort: 9090
+              name: metrics
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: cilium-config
+              mountPath: /etc/cilium
+      volumes:
+        - name: cilium-config
+          configMap:
+            name: {{ include "monitoring-stack.fullname" . }}-cilium-config
+      tolerations:
+        - key: "node.kubernetes.io/not-ready"
+          operator: "Exists"
+          effect: "NoSchedule"
+        - key: "node.kubernetes.io/unreachable"
+          operator: "Exists"
+          effect: "NoSchedule"

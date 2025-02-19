@@ -20,24 +20,10 @@ prometheus:
   storageSpec:
     volumeClaimTemplate:
       spec:
-        accessModes: ["ReadWriteOnce"]
+        accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
             storage: 10Gi
-  additionalScrapeConfigs: |
-    - job_name: 'kube-controller'
-      static_configs:
-        - targets: ['kube-apiserver.monitoring-cluster:6443', 'kube-controller-manager.monitoring-cluster:10257', 'kube-scheduler.monitoring-cluster:10259']
-    - job_name: 'etcd'
-      static_configs:
-        - targets: ['etcd.monitoring-cluster:2379']
-    - job_name: 'kubelet'
-      static_configs:
-        - targets: ['worker1.monitoring-cluster:10250', 'worker2.monitoring-cluster:10250']
-    - job_name: 'cilium'
-      static_configs:
-        - targets: ['cilium.monitoring-cluster:9090']
-
 
 grafana:
   image:
@@ -79,10 +65,9 @@ promtail:
   image:
     repository: grafana/promtail
     tag: 3.0.0
-  config: {}
+  config: { }
   service:
     type: ClusterIP
-
 
 kube_state_metrics:
   image:
@@ -95,3 +80,8 @@ kube_state_metrics:
     limits:
       cpu: 200m
       memory: 512Mi
+
+cilium:
+  image:
+    repository: quay.io/cilium/cilium
+    tag: v1.12.0

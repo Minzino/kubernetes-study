@@ -5,14 +5,13 @@ metadata:
   labels:
     grafana_dashboard: "1"
 data:
-  dashboard1.json: |-
-    {
-      "id": null,
-      "title": "Sample Dashboard",
-      "tags": [ "templated" ],
-      "timezone": "browser",
-      "schemaVersion": 16,
-      "version": 0,
-      "refresh": "5s",
-      "panels": []
-    }
+{{- $files := .Files.Glob "dashboards/*.json" -}}
+{{- if $files }}
+{{- range $path, $file := $files }}
+  {{ base $path }}: |-
+{{ printf "%s" $file | indent 4 }}
+{{- end }}
+{{- else }}
+  dashboard.json: |-
+    {}
+{{- end }}
