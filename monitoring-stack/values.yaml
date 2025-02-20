@@ -16,7 +16,7 @@ prometheus:
         resources:
           requests:
             storage: 10Gi
-        storageClassName: { { .Values.storageClass.name } }  # storageClassName 연결
+        storageClassName: "local-path"
 
   # etcd 인증서가 이미 monitoring 네임스페이스에 secret으로 생성되어 있다고 가정
   additionalScrapeConfigs: |
