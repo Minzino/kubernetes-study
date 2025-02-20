@@ -1,5 +1,10 @@
 apiVersion: v2
 name: monitoring-stack
-description: A Helm chart for deploying a complete monitoring stack with Prometheus, Grafana, Loki, and Promtail
+description: A Helm chart for monitoring stack (Prometheus, Grafana, etc.)
+type: application
 version: 1.0.0
 appVersion: "v3.0.2"
+dependencies:
+  - name: prometheus
+    version: "25.10.0"    # 원하는 버전 선택 (예시)
+    repository: "https://prometheus-community.github.io/helm-charts"

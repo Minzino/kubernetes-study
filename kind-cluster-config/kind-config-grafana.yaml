@@ -5,11 +5,23 @@ nodes:
   - role: control-plane
     image: kindest/node:v1.29.7
     extraPortMappings:
-      - containerPort: 32000   # Grafana의 NodePort (service.yaml에서 지정한 값)
-        hostPort: 3000         # 외부에서 접속할 포트
+      - containerPort: 32000   # Grafana 외부 접속용 (호스트:3000)
+        hostPort: 3000
         protocol: TCP
-      - containerPort: 32001   # Prometheus의 NodePort (service.yaml에서 지정한 값)
-        hostPort: 9090         # 외부에서 접속할 포트
+      - containerPort: 32001   # Prometheus 외부 접속용 (호스트:9090)
+        hostPort: 9090
+        protocol: TCP
+      - containerPort: 10251   # kube‑scheduler 메트릭 (호스트:10251)
+        hostPort: 10251
+        protocol: TCP
+      - containerPort: 10257   # kube‑controller‑manager 메트릭 (호스트:10257)
+        hostPort: 10257
+        protocol: TCP
+      - containerPort: 2381    # etcd 메트릭 (호스트:2381)
+        hostPort: 2381
+        protocol: TCP
+      - containerPort: 10255   # kubelet read‑only 메트릭 (호스트:10255)
+        hostPort: 10255
         protocol: TCP
   - role: worker
     image: kindest/node:v1.29.7

@@ -2,14 +2,6 @@ prometheus:
   image:
     repository: quay.io/prometheus/prometheus
     tag: v2.55.1
-  prometheusOperator:
-    image:
-      repository: quay.io/prometheus-operator/prometheus-operator
-      tag: v0.78.2
-  prometheusConfigReloader:
-    image:
-      repository: quay.io/prometheus-operator/prometheus-config-reloader
-      tag: v0.78.2
   resources:
     requests:
       cpu: 200m
@@ -25,63 +17,34 @@ prometheus:
           requests:
             storage: 10Gi
 
-grafana:
-  image:
-    repository: docker.io/grafana/grafana
-    tag: 11.3.1
-  sidecar:
-    image:
-      repository: quay.io/kiwigrid/k8s-sidecar
-      tag: 1.28.0
-  adminUser: admin
-  adminPassword: admin
-  service:
-    type: NodePort
-    nodePort: 30300
+  # etcd 인증서가 이미 monitoring 네임스페이스에 secret 등으로 생성되어 있다고 가정
+  additionalScrapeConfigs: |
+    - job_name: 'kube-etcd'
+      kubernetes_sd_configs:
+        - role: node
+      scheme: https
+      tls_config:
+        ca_file: /etc/prometheus/secrets/etcd-client-cert/etcd-ca
+        cert_file: /etc/prometheus/secrets/etcd-client-cert/etcd-client
+        key_file: /etc/prometheus/secrets/etcd-client-cert/etcd-client-key
+      relabel_configs:
+        - source_labels: [__address__]
+          action: replace
+          target_label: __address__
+          regex: ([^:]+):\d+
+          replacement: ${1}:2379
 
-prometheus_node_exporter:
-  image:
-    repository: quay.io/prometheus/node-exporter
-    tag: v1.8.2
-  resources:
-    requests:
-      cpu: 50m
-      memory: 50Mi
-    limits:
-      cpu: 100m
-      memory: 100Mi
+  # 컨트롤러 컴포넌트 메트릭 수집 설정 (kube-scheduler, kube-controller-manager)
+  additionalScrapeConfigsController: |
+    - job_name: 'kube-scheduler'
+      static_configs:
+        - targets: ['localhost:10251']
+    - job_name: 'kube-controller-manager'
+      static_configs:
+        - targets: ['localhost:10257']
 
-loki:
-  image:
-    repository: docker.io/grafana/loki
-    tag: 3.3.0
-  service:
-    type: ClusterIP
-  persistence:
-    enabled: true
-    size: 10Gi
-
-promtail:
-  image:
-    repository: grafana/promtail
-    tag: 3.0.0
-  config: { }
-  service:
-    type: ClusterIP
-
-kube_state_metrics:
-  image:
-    repository: registry.k8s.io/kube-state-metrics/kube-state-metrics
-    tag: v2.14.0
-  resources:
-    requests:
-      cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 200m
-      memory: 512Mi
-
-cilium:
-  image:
-    repository: quay.io/cilium/cilium
-    tag: v1.12.0
+# prometheus Operator 차트에서 additionalScrapeConfigs는 보통 prometheus.additionalScrapeConfigs 에서 설정합니다.
+# 예: 아래처럼 사용 (해당 Operator 차트의 문서를 참고)
+prometheusOperator:
+  prometheusSpec:
+    additionalScrapeConfigsSecret: additional-scrape-configs
