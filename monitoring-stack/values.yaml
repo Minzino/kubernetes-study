@@ -48,8 +48,6 @@ prometheusOperator:
   prometheusSpec:
     additionalScrapeConfigsSecret: additional-scrape-configs
 
-# 스토리지클래스 관련 값 (템플릿에서 사용할 변수)
 storageClass:
-  name: local-path
-  # provisioner 값은 환경에 따라 다릅니다. 예를 들어, local-path-provisioner 사용 시:
+  name: "local-path"
   provisioner: "rancher.io/local-path"
