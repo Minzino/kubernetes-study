@@ -16,8 +16,9 @@ prometheus:
         resources:
           requests:
             storage: 10Gi
+        storageClassName: { { .Values.storageClass.name } }  # storageClassName 연결
 
-  # etcd 인증서가 이미 monitoring 네임스페이스에 secret 등으로 생성되어 있다고 가정
+  # etcd 인증서가 이미 monitoring 네임스페이스에 secret으로 생성되어 있다고 가정
   additionalScrapeConfigs: |
     - job_name: 'kube-etcd'
       kubernetes_sd_configs:
@@ -34,7 +35,7 @@ prometheus:
           regex: ([^:]+):\d+
           replacement: ${1}:2379
 
-  # 컨트롤러 컴포넌트 메트릭 수집 설정 (kube-scheduler, kube-controller-manager)
+  # 컨트롤러 컴포넌트 메트릭 (kube-scheduler, kube-controller-manager)
   additionalScrapeConfigsController: |
     - job_name: 'kube-scheduler'
       static_configs:
@@ -43,8 +44,12 @@ prometheus:
       static_configs:
         - targets: ['localhost:10257']
 
-# prometheus Operator 차트에서 additionalScrapeConfigs는 보통 prometheus.additionalScrapeConfigs 에서 설정합니다.
-# 예: 아래처럼 사용 (해당 Operator 차트의 문서를 참고)
 prometheusOperator:
   prometheusSpec:
     additionalScrapeConfigsSecret: additional-scrape-configs
+
+# 스토리지클래스 관련 값 (템플릿에서 사용할 변수)
+storageClass:
+  name: local-path
+  # provisioner 값은 환경에 따라 다릅니다. 예를 들어, local-path-provisioner 사용 시:
+  provisioner: "rancher.io/local-path"
