@@ -6,7 +6,7 @@ objstoreConfig: |-
     access_key: admin
     secret_key: admin1234
     insecure: true
-    signature_version2: false
+    signature_version2: true
 
 query:
   enabled: true

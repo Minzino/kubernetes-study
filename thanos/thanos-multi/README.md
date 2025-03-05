@@ -126,7 +126,7 @@ config:
   access_key: admin
   secret_key: admin1234
   insecure: true
-  signature_version2: false
+  signature_version2: true
 ```
 ※ `<minio-cluster-IP>`는 `kubectl get nodes --context kind-minio -o wide`로 확인합니다.
 
@@ -184,12 +184,12 @@ prometheus:
       cluster: biz1  # biz1 클러스터 고유 레이블
 
     thanos:
-      image: "quay.io/thanos/thanos:v0.24.0"
+      image: "quay.io/thanos/thanos:v0.31.0"
       objectStorageConfig:
         existingSecret:
           name: thanos-minio-secret
           key: minio-key.yaml
-      version: v0.24.0
+      version: v0.31.0
 
     additionalScrapeConfigs:
       - job_name: 'minio-metrics'
@@ -250,12 +250,12 @@ prometheus:
       cluster: biz2  # biz2 클러스터 고유 레이블
 
     thanos:
-      image: "quay.io/thanos/thanos:v0.24.0"
+      image: "quay.io/thanos/thanos:v0.31.0"
       objectStorageConfig:
         existingSecret:
           name: thanos-minio-secret
           key: minio-key.yaml
-      version: v0.24.0
+      version: v0.31.0
 
     additionalScrapeConfigs:
       - job_name: 'minio-metrics'
@@ -296,7 +296,7 @@ objstoreConfig: |-
     access_key: admin
     secret_key: admin1234
     insecure: true
-    signature_version2: false
+    signature_version2: true
 
 query:
   enabled: true

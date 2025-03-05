@@ -31,12 +31,12 @@ prometheus:
       cluster: biz2  # biz1 클러스터 고유 레이블
 
     thanos:
-      image: "quay.io/thanos/thanos:v0.24.0"
+      image: "quay.io/thanos/thanos:v0.31.0"
       objectStorageConfig:
         existingSecret:
           name: thanos-minio-secret
           key: minio-key.yaml
-      version: v0.24.0
+      version: v0.31.0
 
     additionalScrapeConfigs:
       - job_name: 'minio-metrics'
