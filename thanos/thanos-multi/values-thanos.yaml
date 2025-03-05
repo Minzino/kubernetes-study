@@ -1,0 +1,42 @@
+objstoreConfig: |-
+  type: s3
+  config:
+    bucket: thanos
+    endpoint: 172.21.0.8:32000
+    access_key: admin
+    secret_key: admin1234
+    insecure: true
+    signature_version2: false
+
+query:
+  enabled: true
+  # biz 클러스터의 Prometheus 사이드카(NodePort로 노출된 주소)와 mgmt 내부 Store Gateway를 등록합니다.
+  stores:
+    - 172.21.0.4:31000   # biz1 클러스터의 노드 IP (예: biz1-control-plane)
+    - 172.21.0.6:31000   # biz1 클러스터의 다른 노드 (필요시 단일 주소 사용)
+    - thanos-storegateway.monitoring.svc.cluster.local:10901  # mgmt 클러스터 내부 Store Gateway
+  replicaCount: 2
+  service:
+    type: NodePort
+    nodePorts:
+      grpc: 30901
+      http: 30902
+  replicaLabel: prometheus_replica
+
+bucketweb:
+  enabled: true
+
+compactor:
+  enabled: true
+
+storegateway:
+  enabled: true
+
+ruler:
+  enabled: true
+  alertmanagers:
+    - http://alertmanager.monitoring.svc.cluster.local:9093
+  config: |-
+    groups:
+    - name: default
+      rules: []

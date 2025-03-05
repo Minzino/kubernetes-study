@@ -1,0 +1,15 @@
+mode: standalone
+
+auth:
+  rootUser: admin
+  rootPassword: "admin1234"
+
+defaultBuckets: "thanos"
+
+replicaCount: 1
+
+service:
+  type: NodePort
+  nodePorts:
+    api: 32000
+    console: 32001

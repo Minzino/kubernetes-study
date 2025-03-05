@@ -1,0 +1,33 @@
+objstoreConfig: |-
+  type: s3
+  config:
+    bucket: thanos
+    endpoint: minio.minio.svc.cluster.local:9000
+    access_key: admin
+    secret_key: admin1234
+    insecure: true
+    signature_version2: false
+
+query:
+  stores:
+    - kube-prometheus-stack-thanos-discovery.monitoring.svc.cluster.local:10901
+    - thanos-storegateway.monitoring.svc.cluster.local:10901
+  replicaCount: 2
+
+bucketweb:
+  enabled: true
+
+compactor:
+  enabled: true
+
+storegateway:
+  enabled: true
+
+ruler:
+  enabled: true
+  alertmanagers:
+    - http://alertmanager.monitoring.svc.cluster.local:9093
+  config: |-
+    groups:
+    - name: default
+      rules: []

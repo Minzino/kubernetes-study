@@ -1,12 +1,11 @@
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
-name: monitoring-cluster
 nodes:
   - role: control-plane
     image: kindest/node:v1.29.7
   - role: control-plane
     image: kindest/node:v1.29.7
-  - role: control-plane
+  - role: worker
     image: kindest/node:v1.29.7
   - role: worker
     image: kindest/node:v1.29.7

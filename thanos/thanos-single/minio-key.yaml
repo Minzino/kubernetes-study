@@ -1,0 +1,9 @@
+type: s3
+config:
+  bucket: thanos
+  endpoint: minio.minio.svc.cluster.local:9000
+  access_key: admin
+  secret_key: admin1234
+  insecure: true
+  signature_version2: false
+

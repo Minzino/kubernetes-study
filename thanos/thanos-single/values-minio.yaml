@@ -1,0 +1,9 @@
+mode: standalone
+
+auth:
+  rootUser: admin
+  rootPassword: "admin1234"
+
+defaultBuckets: "thanos"
+
+replicaCount: 1
