@@ -1,7 +1,7 @@
 type: s3
 config:
   bucket: thanos
-  endpoint: 172.21.0.8:32000   # mgmt 클러스터의 MinIO가 노출되는 IP:NodePort (예: mgmt-control-plane IP)
+  endpoint: 172.21.0.14:32000   # mgmt 클러스터의 MinIO가 노출되는 IP:NodePort (예: mgmt-control-plane IP)
   access_key: admin
   secret_key: admin1234
   insecure: true

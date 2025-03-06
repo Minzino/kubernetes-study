@@ -2,34 +2,30 @@ alertmanager:
   enabled: true
 
 grafana:
+  enabled: true
   defaultDashboardsTimezone: Asia/Seoul
   adminPassword: admin1234
-  additionalDataSources:
-    - name: Thanos
-      type: prometheus
-      access: proxy
-      # 향후 mgmt 클러스터의 Thanos Query가 NodePort나 Ingress를 통해 외부에서 접근 가능한 주소로 수정
-      # url: http://<mgmt-query-IP>:9091
-      url: http://172.21.0.2:30902
-      isDefault: false
-      editable: true
+  persistence:
+    enabled: true
+    storageClass: "grafana-pv-hostpath"   # 클러스터에 동적 프로비저닝(StorageClass 이름) 사용. 동적 프로비저닝이 안되는 경우 수동 PV 예시 참고.
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
 
 prometheus:
   thanosService:
     enabled: true
     type: NodePort
     clusterIP: ""
-    nodePort: 31000  # biz1 클러스터의 Prometheus 사이드카가 외부에 노출되는 포트
+    nodePort: 31000  # Prometheus 사이드카가 외부에 노출되는 포트
 
   prometheusSpec:
     replicas: 1
     retention: 5d
     retentionSize: "10GiB"
     scrapeInterval: "15s"
-
     externalLabels:
       cluster: biz2  # biz1 클러스터 고유 레이블
-
     thanos:
       image: "quay.io/thanos/thanos:v0.31.0"
       objectStorageConfig:
@@ -37,9 +33,8 @@ prometheus:
           name: thanos-minio-secret
           key: minio-key.yaml
       version: v0.31.0
-
     additionalScrapeConfigs:
       - job_name: 'minio-metrics'
         metrics_path: /minio/v2/metrics/cluster
         static_configs:
-          - targets: ['172.21.0.8:32000']
+          - targets: ['172.21.0.14:32000']
