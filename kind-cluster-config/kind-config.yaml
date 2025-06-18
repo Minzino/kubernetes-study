@@ -1,0 +1,52 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: ceph-cluster
+nodes:
+  - role: control-plane
+    image: kindest/node:v1.29.2@sha256:51a1434a5397193442f0be2a297b488b6c919ce8a3931be0ce822606ea5ca245
+    extraMounts:
+      - hostPath: ./node-storage/cp0-disk
+        containerPath: /mnt/ceph-storage
+      - hostPath: /lib/modules
+        containerPath: /lib/modules
+        readOnly: true
+  - role: control-plane
+    image: kindest/node:v1.29.2@sha256:51a1434a5397193442f0be2a297b488b6c919ce8a3931be0ce822606ea5ca245
+    extraMounts:
+      - hostPath: ./node-storage/cp1-disk
+        containerPath: /mnt/ceph-storage
+      - hostPath: /lib/modules
+        containerPath: /lib/modules
+        readOnly: true
+  - role: control-plane
+    image: kindest/node:v1.29.2@sha256:51a1434a5397193442f0be2a297b488b6c919ce8a3931be0ce822606ea5ca245
+    extraMounts:
+      - hostPath: ./node-storage/cp2-disk
+        containerPath: /mnt/ceph-storage
+      - hostPath: /lib/modules
+        containerPath: /lib/modules
+        readOnly: true
+  - role: worker
+    image: kindest/node:v1.29.2@sha256:51a1434a5397193442f0be2a297b488b6c919ce8a3931be0ce822606ea5ca245
+    extraMounts:
+      - hostPath: ./node-storage/w0-disk
+        containerPath: /mnt/ceph-storage
+      - hostPath: /lib/modules
+        containerPath: /lib/modules
+        readOnly: true
+  - role: worker
+    image: kindest/node:v1.29.2@sha256:51a1434a5397193442f0be2a297b488b6c919ce8a3931be0ce822606ea5ca245
+    extraMounts:
+      - hostPath: ./node-storage/w1-disk
+        containerPath: /mnt/ceph-storage
+      - hostPath: /lib/modules
+        containerPath: /lib/modules
+        readOnly: true
+  - role: worker
+    image: kindest/node:v1.29.2@sha256:51a1434a5397193442f0be2a297b488b6c919ce8a3931be0ce822606ea5ca245
+    extraMounts:
+      - hostPath: ./node-storage/w2-disk
+        containerPath: /mnt/ceph-storage
+      - hostPath: /lib/modules
+        containerPath: /lib/modules
+        readOnly: true

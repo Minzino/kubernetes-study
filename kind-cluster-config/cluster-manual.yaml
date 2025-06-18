@@ -1,0 +1,66 @@
+apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  name: rook-ceph
+  namespace: rook-ceph
+spec:
+  cephVersion:
+    image: quay.io/ceph/ceph:v18.2.4 # Rook v1.15는 Ceph Quincy(v17) 또는 Reef(v18)와 호환됩니다.
+  dataDirHostPath: /var/lib/rook
+  skipUpgradeChecks: false
+  continueUpgradeAfterChecksEvenIfNotHealthy: false
+  waitTimeoutForHealthyOSDInMinutes: 10
+  mon:
+    count: 3 # 프로덕션 환경에서는 3개 또는 5개의 모니터를 권장합니다.
+    allowMultiplePerNode: true # Kind 환경에서는 노드 수가 적으므로 true로 설정 권장
+  mgr:
+    count: 1
+    allowMultiplePerNode: false
+  dashboard:
+    enabled: true
+    ssl: false
+  monitoring:
+    enabled: false
+  crashCollector:
+    disable: false
+  logCollector:
+    enabled: true
+    periodicity: daily
+    maxLogSize: 500M
+  cleanupPolicy:
+    confirmation: "" 
+    sanitizeDisks:
+      method: quick 
+      dataSource: zero 
+      iteration: 1 
+    allowUninstallWithVolumes: false
+  removeOSDsIfOutAndSafeToRemove: false
+  storage:
+    useAllNodes: false
+    useAllDevices: false
+    nodes:
+    - name: "ceph-cluster-control-plane"
+      devices:
+      - name: "loop6" 
+    - name: "ceph-cluster-control-plane2"
+      devices:
+      - name: "loop7" 
+    - name: "ceph-cluster-control-plane3"
+      devices:
+      - name: "loop8" 
+    - name: "ceph-cluster-worker"
+      devices:
+      - name: "loop9" 
+    - name: "ceph-cluster-worker2"
+      devices:
+      - name: "loop10" 
+    - name: "ceph-cluster-worker3"
+      devices:
+      - name: "loop11"
+  disruptionManagement:
+    managePodBudgets: true
+    osdMaintenanceTimeout: 30
+    pgHealthCheckTimeout: 0 
+  security:
+    allowPrivilegeEscalation: true
+    privileged: true 

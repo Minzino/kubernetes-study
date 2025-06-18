@@ -1,0 +1,99 @@
+#  시크릿에서 루트 사용자/비밀번호를 가져옴
+existingSecret: minio-secret
+
+# MinIO를 단일 모드로 실행
+mode: standalone
+
+# 노드에 연결된 드라이브 수
+drivesPerNode: 1
+
+  
+# MinIO는 4개 이상의 노드로 분산을 구성해야 안정적이나 stanalone 방식이므로 1
+replicas: 1
+
+  
+# 확장된 MinIO 클러스터 수
+pools: 1
+
+  
+# MinIO 서버를 amd64 노드에서만 실행
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/arch
+          operator: In
+          values:
+          - amd64
+
+# 볼륨 영속성 설정
+persistence:
+  enabled: true
+  storageClass: "nfs-client"  # 사용할 StorageClass
+  accessMode: ReadWriteOnce # 볼륨 접근 모드
+  size: 10Gi                # 볼륨 크기
+
+# 리소스 요청량 설정
+resources:
+  requests:
+    memory: 1Gi             # 최소 메모리 요청량
+
+# 서비스 모니터링 설정
+metrics:
+  serviceMonitor:
+    enabled: true           # Prometheus ServiceMonitor 사용 여부
+    includeNode: true       # 노드 메트릭 포함 여부
+
+# MinIO에 생성할 버킷 설정 (standalone 에서만 사용 가능)
+defaultBuckets: "thanos ,k8s-loki, k8s-tempo"
+
+  
+# MinIO 버킷에 대한 접근 정책 설정
+policies:
+  - name: loki
+    statements:
+      - resources:
+          - 'arn:aws:s3:::k8s-loki'
+          - 'arn:aws:s3:::k8s-loki/*'
+        actions:
+          - "s3:DeleteObject"
+          - "s3:GetObject"
+          - "s3:ListBucket"
+          - "s3:PutObject"
+  - name: tempo
+    statements:
+      - resources:
+          - 'arn:aws:s3:::k8s-tempo'
+          - 'arn:aws:s3:::k8s-tempo/*'
+        actions:
+          - "s3:DeleteObject"
+          - "s3:GetObject"
+          - "s3:ListBucket"
+          - "s3:PutObject"
+          - "s3:GetObjectTagging"
+          - "s3:PutObjectTagging"
+
+# MinIO 사용자 설정
+users:
+  - accessKey: loki
+    existingSecret: minio-secret        # 시크릿 이름
+    existingSecretKey: lokiPassword     # 시크릿에서 사용할 key
+    policy: loki                        # 연결할 정책 이름
+  - accessKey: tempo
+    existingSecret: minio-secret
+    existingSecretKey: tempoPassword
+    policy: tempo
+service:
+  type: NodePort
+  ports:
+    api: 9000
+    console: 9001
+  nodePorts:
+    api: "32000"
+    console: "32001"
+
+# minio console info
+auth:
+  rootUser: minioadmin
+  rootPassword: minioadmin

@@ -1,0 +1,49 @@
+# Helm Chart files
+Chart.lock
+**/charts/
+*.tgz
+
+# 민감한 정보가 포함된 파일들
+**/minio-key.yaml
+**/secrets.yaml
+**/secret-*.yaml
+values-prod.yaml
+values-production.yaml
+values-dev.yaml
+values-development.yaml
+values-local.yaml
+
+# 임시 및 압축 파일들
+*.zip
+*.tar.gz
+*.tar
+*.tmp
+*.temp
+*.log
+
+# OS 생성 파일들
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE 및 에디터 파일들
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Kubernetes 관련 임시 파일들
+*.kubeconfig
+kubeconfig
+**/rendered-manifests/
+**/output/
+
+# 백업 파일들
+*.bak
+*.backup
+*-backup.* 
